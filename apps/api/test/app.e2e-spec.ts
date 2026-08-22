@@ -24,8 +24,8 @@ describe('Thugzcation (e2e)', () => {
       .expect(({ body }) => {
         expect(body).toMatchObject({
           thugzcation: { year: 2026, selectedThugzMansion: null },
-          thugz: [{ name: 'Willie Steel' }, { name: 'Jake Jarkin' }],
         });
+        expect(body).not.toHaveProperty('thugz');
       });
   });
 

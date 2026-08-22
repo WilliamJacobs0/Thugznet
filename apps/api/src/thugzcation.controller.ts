@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { CurrentThug, type AuthenticatedThug } from './auth/current-thug';
+import { EntraAuthGuard } from './auth/entra-auth.guard';
 import { ThugzcationService } from './thugzcation.service';
 
 export type CreateThugzMansionRequest = {
@@ -17,7 +19,11 @@ export class ThugzcationController {
   }
 
   @Post('mansions')
-  addThugzMansion(@Body() request: CreateThugzMansionRequest) {
-    return this.thugzcationService.addThugzMansion(request);
+  @UseGuards(EntraAuthGuard)
+  addThugzMansion(
+    @CurrentThug() thug: AuthenticatedThug,
+    @Body() request: CreateThugzMansionRequest,
+  ) {
+    return this.thugzcationService.addThugzMansion(thug.id, request);
   }
 }

@@ -19,15 +19,29 @@ async function main() {
     create: { year: 2026 },
   });
 
-  await Promise.all(
-    ['Willie Steel', 'Jake Jarkin'].map((name) =>
-      prisma.thug.upsert({
-        where: { name },
-        update: {},
-        create: { name },
-      }),
-    ),
-  );
+  const willie = await prisma.thug.upsert({
+    where: { firstName: 'Willie' },
+    update: process.env.THUG_WILLIE_ENTRA_OBJECT_ID
+      ? { entraObjectId: process.env.THUG_WILLIE_ENTRA_OBJECT_ID }
+      : {},
+    create: {
+      firstName: 'Willie',
+      displayName: 'Willie Steel',
+      entraObjectId: process.env.THUG_WILLIE_ENTRA_OBJECT_ID || null,
+    },
+  });
+
+  await prisma.thug.upsert({
+    where: { firstName: 'Jake' },
+    update: process.env.THUG_JAKE_ENTRA_OBJECT_ID
+      ? { entraObjectId: process.env.THUG_JAKE_ENTRA_OBJECT_ID }
+      : {},
+    create: {
+      firstName: 'Jake',
+      displayName: 'Jake Jarkin',
+      entraObjectId: process.env.THUG_JAKE_ENTRA_OBJECT_ID || null,
+    },
+  });
 
   await prisma.thugzMansion.upsert({
     where: {
@@ -42,6 +56,7 @@ async function main() {
       title: 'Local test nomination',
       listingUrl: 'https://example.com/listing',
       summary: '',
+      nominatedByThugId: willie.id,
     },
   });
 }

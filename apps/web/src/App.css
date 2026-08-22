@@ -44,6 +44,35 @@ h2 {
   text-transform: uppercase;
 }
 
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.text-button {
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.text-button:hover:not(:disabled) {
+  background: transparent;
+  color: var(--accent);
+}
+
+.thug-roster {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
 .thug-roster h2 {
   margin-bottom: 0.45rem;
   font-size: 0.75rem;
@@ -68,6 +97,10 @@ h2 {
   grid-template-columns: minmax(0, 1fr) 18rem;
   gap: 2rem;
   padding-top: 2rem;
+}
+
+.workspace.public {
+  grid-template-columns: 1fr;
 }
 
 .section-heading {
@@ -100,6 +133,7 @@ h2 {
 
 .mansion-card,
 .add-panel,
+.profile-panel,
 .empty-state {
   border: 1px solid var(--ink);
   background: var(--paper);
@@ -149,12 +183,19 @@ h2 {
   text-underline-offset: 0.2rem;
 }
 
-.add-panel {
+.sidebar {
+  display: grid;
   align-self: start;
+  gap: 0.75rem;
+}
+
+.add-panel,
+.profile-panel {
   padding: 1rem;
 }
 
-.add-panel h2 {
+.add-panel h2,
+.profile-panel h2 {
   margin-bottom: 1.25rem;
 }
 
@@ -251,7 +292,7 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .add-panel {
+  .sidebar {
     grid-row: 1;
   }
 }

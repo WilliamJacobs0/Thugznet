@@ -10,8 +10,11 @@ datasource db {
 }
 
 model Thug {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id                     Int             @id @default(autoincrement())
+  firstName              String          @unique
+  displayName            String
+  entraObjectId          String?         @unique
+  nominatedThugzMansions ThugzMansion[]  @relation("NominatedByThug")
 }
 
 model Thugzcation {
@@ -33,6 +36,9 @@ model ThugzMansion {
   location               String?
   bedrooms               Int?
   createdAt              DateTime     @default(now())
+  nominatedByThugId      Int
+  nominatedBy            Thug         @relation("NominatedByThug", fields: [nominatedByThugId], references: [id], onDelete: Restrict)
 
   @@unique([thugzcationId, listingUrl])
+  @@index([nominatedByThugId])
 }

@@ -12,23 +12,26 @@ export class ThugzcationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getThugzcation() {
-    const [thugzcation, thugz] = await Promise.all([
-      this.getCurrentThugzcation(),
-      this.prisma.thug.findMany({ orderBy: { id: 'asc' } }),
-    ]);
+    const thugzcation = await this.getCurrentThugzcation();
 
     return {
       thugzcation: {
         id: thugzcation.id,
         year: thugzcation.year,
-        selectedThugzMansion: thugzcation.selectedThugzMansion,
+        selectedThugzMansion: thugzcation.selectedThugzMansion
+          ? this.publicMansion(thugzcation.selectedThugzMansion)
+          : null,
       },
-      thugz,
-      eligibleThugzMansions: thugzcation.eligibleThugzMansions,
+      eligibleThugzMansions: thugzcation.eligibleThugzMansions.map((mansion) =>
+        this.publicMansion(mansion),
+      ),
     };
   }
 
-  async addThugzMansion(request: CreateThugzMansionRequest) {
+  async addThugzMansion(
+    nominatedByThugId: number,
+    request: CreateThugzMansionRequest,
+  ) {
     const title = this.requiredText(request.title, 'Title');
     const listingUrl = this.validListingUrl(request.listingUrl);
     const summary = this.requiredText(request.summary, 'Summary');
@@ -53,8 +56,27 @@ export class ThugzcationService {
         title,
         listingUrl,
         summary,
+        nominatedByThugId,
       },
     });
+  }
+
+  private publicMansion(mansion: {
+    id: number;
+    title: string;
+    listingUrl: string;
+    summary: string;
+    location: string | null;
+    bedrooms: number | null;
+  }) {
+    return {
+      id: mansion.id,
+      title: mansion.title,
+      listingUrl: mansion.listingUrl,
+      summary: mansion.summary,
+      location: mansion.location,
+      bedrooms: mansion.bedrooms,
+    };
   }
 
   private async getCurrentThugzcation() {
