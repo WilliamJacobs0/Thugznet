@@ -1,0 +1,38 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Thug {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model Thugzcation {
+  id                     Int            @id @default(autoincrement())
+  year                   Int            @unique
+  eligibleThugzMansions  ThugzMansion[] @relation("EligibleThugzMansions")
+  selectedThugzMansionId Int?           @unique
+  selectedThugzMansion   ThugzMansion?  @relation("SelectedThugzMansion", fields: [selectedThugzMansionId], references: [id], onDelete: SetNull)
+}
+
+model ThugzMansion {
+  id                     Int          @id @default(autoincrement())
+  thugzcationId          Int
+  thugzcation            Thugzcation  @relation("EligibleThugzMansions", fields: [thugzcationId], references: [id], onDelete: Cascade)
+  selectedForThugzcation Thugzcation? @relation("SelectedThugzMansion")
+  title                  String
+  listingUrl             String
+  summary                String
+  location               String?
+  bedrooms               Int?
+  createdAt              DateTime     @default(now())
+
+  @@unique([thugzcationId, listingUrl])
+}

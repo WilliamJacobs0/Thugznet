@@ -1,0 +1,26 @@
+:root {
+  font-family: "Courier New", Courier, monospace;
+  color: #22231f;
+  background: #f2eddd;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --accent: #a53b2a;
+  --ink: #22231f;
+  --link: #164f83;
+  --muted: #67685f;
+  --paper: #faf7eb;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background-image: linear-gradient(rgb(34 35 31 / 0.025) 1px, transparent 1px);
+  background-size: 100% 1.5rem;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}

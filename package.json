@@ -1,0 +1,16 @@
+{
+  "name": "thugzcation",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --workspace apps/web && npm run build --workspace apps/api",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run db:migrate --workspace apps/api",
+    "db:seed": "npm run db:seed --workspace apps/api",
+    "db:up": "docker compose up -d",
+    "dev:api": "npm run start:dev --workspace apps/api",
+    "dev:web": "npm run dev --workspace apps/web"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
+}
