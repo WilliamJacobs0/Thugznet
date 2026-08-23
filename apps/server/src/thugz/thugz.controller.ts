@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
-import { CurrentThug, type AuthenticatedThug } from './auth/current-thug';
-import { EntraAuthGuard } from './auth/entra-auth.guard';
-import { ThugService } from './thug.service';
+import { CurrentThug, type AuthenticatedThug } from '../auth/current-thug';
+import { EntraAuthGuard } from '../auth/entra-auth.guard';
+import { ThugzService } from './thugz.service';
 
 type UpdateDisplayNameRequest = {
   displayName: string;
@@ -9,8 +9,8 @@ type UpdateDisplayNameRequest = {
 
 @Controller()
 @UseGuards(EntraAuthGuard)
-export class ThugController {
-  constructor(private readonly thugService: ThugService) {}
+export class ThugzController {
+  constructor(private readonly thugzService: ThugzService) {}
 
   @Get('me')
   getMe(@CurrentThug() thug: AuthenticatedThug) {
@@ -22,11 +22,11 @@ export class ThugController {
     @CurrentThug() thug: AuthenticatedThug,
     @Body() request: UpdateDisplayNameRequest,
   ) {
-    return this.thugService.updateDisplayName(thug.id, request.displayName);
+    return this.thugzService.updateDisplayName(thug.id, request.displayName);
   }
 
   @Get('thugz')
   getThugz() {
-    return this.thugService.getThugz();
+    return this.thugzService.getThugz();
   }
 }

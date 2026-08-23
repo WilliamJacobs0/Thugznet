@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
-export class ThugService {
+export class ThugzService {
   constructor(private readonly prisma: PrismaService) {}
 
   getThugz() {

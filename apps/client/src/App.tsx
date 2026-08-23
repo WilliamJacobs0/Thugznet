@@ -1,63 +1,26 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import './App.css'
-import { getApiToken, type AuthSession } from './auth.ts'
-
-type Thug = {
-  id: number
-  firstName: string
-  displayName: string
-}
-
-type ThugzMansion = {
-  id: number
-  title: string
-  listingUrl: string
-  summary: string
-  location: string | null
-  bedrooms: number | null
-}
-
-type ThugzcationView = {
-  thugzcation: {
-    id: number
-    year: number
-    selectedThugzMansion: ThugzMansion | null
-  }
-  eligibleThugzMansions: ThugzMansion[]
-}
+import {
+  addThugzMansion,
+  getCurrentThug,
+  getThugzcation,
+  getThugz,
+  updateCurrentThug,
+  type NewThugzMansion,
+  type Thug,
+  type ThugzcationView,
+} from './api.ts'
+import type { AuthSession } from './auth.ts'
 
 type AppProps = {
   authSession: AuthSession | null
 }
 
-const emptyMansion = {
+const emptyMansion: NewThugzMansion = {
   title: '',
   listingUrl: '',
   summary: '',
-}
-
-async function responseJson<T>(response: Response): Promise<T> {
-  if (response.ok) {
-    return response.json() as Promise<T>
-  }
-
-  const error = (await response.json().catch(() => null)) as {
-    message?: string
-  } | null
-  throw new Error(error?.message ?? `Request failed with status ${response.status}`)
-}
-
-async function authenticatedJson<T>(
-  session: AuthSession,
-  input: RequestInfo | URL,
-  init?: RequestInit,
-) {
-  const token = await getApiToken(session)
-  const headers = new Headers(init?.headers)
-  headers.set('Authorization', `Bearer ${token}`)
-
-  return fetch(input, { ...init, headers }).then(responseJson<T>)
 }
 
 function App({ authSession }: AppProps) {
@@ -71,8 +34,7 @@ function App({ authSession }: AppProps) {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    void fetch('/api/thugzcation')
-      .then(responseJson<ThugzcationView>)
+    void getThugzcation()
       .then(setView)
       .catch(showError)
   }, [])
@@ -83,8 +45,8 @@ function App({ authSession }: AppProps) {
     }
 
     void Promise.all([
-      authenticatedJson<Thug>(authSession, '/api/me'),
-      authenticatedJson<Thug[]>(authSession, '/api/thugz'),
+      getCurrentThug(authSession),
+      getThugz(authSession),
     ])
       .then(([profile, roster]) => {
         setCurrentThug(profile)
@@ -123,11 +85,7 @@ function App({ authSession }: AppProps) {
     setIsSaving(true)
 
     try {
-      const updatedThug = await authenticatedJson<Thug>(authSession, '/api/me', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName }),
-      })
+      const updatedThug = await updateCurrentThug(authSession, displayName)
 
       setCurrentThug(updatedThug)
       setThugz((roster) =>
@@ -151,15 +109,7 @@ function App({ authSession }: AppProps) {
     setIsSaving(true)
 
     try {
-      const createdMansion = await authenticatedJson<ThugzMansion>(
-        authSession,
-        '/api/thugzcation/mansions',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(mansion),
-        },
-      )
+      const createdMansion = await addThugzMansion(authSession, mansion)
 
       setView((currentView) =>
         currentView

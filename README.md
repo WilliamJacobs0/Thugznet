@@ -7,8 +7,8 @@ npm install
 npm run db:up
 npm run db:migrate
 npm run db:seed
-npm run dev:api
-npm run dev:web
+npm run dev:server
+npm run dev:client
 ```
 
 The mansion list is public and works without Entra configuration. Profile,
@@ -22,8 +22,8 @@ Create two app registrations in the same Entra tenant:
 2. A SPA registration with `http://localhost:5173` as a redirect URI and
    delegated permission to the API scope.
 
-Copy `apps/api/.env.example` to `apps/api/.env` and
-`apps/web/.env.example` to `apps/web/.env`, then supply the tenant,
+Copy `apps/server/.env.example` to `apps/server/.env` and
+`apps/client/.env.example` to `apps/client/.env`, then supply the tenant,
 application, and scope identifiers. No client secret is used by the SPA or
 required by the API for token validation.
 

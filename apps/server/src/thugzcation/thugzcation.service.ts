@@ -4,8 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
-import type { CreateThugzMansionRequest } from './thugzcation.controller';
+import { PrismaService } from '../database/prisma.service';
+
+export type AddThugzMansionInput = {
+  title: string;
+  listingUrl: string;
+  summary: string;
+};
 
 @Injectable()
 export class ThugzcationService {
@@ -30,7 +35,7 @@ export class ThugzcationService {
 
   async addThugzMansion(
     nominatedByThugId: number,
-    request: CreateThugzMansionRequest,
+    request: AddThugzMansionInput,
   ) {
     const title = this.requiredText(request.title, 'Title');
     const listingUrl = this.validListingUrl(request.listingUrl);

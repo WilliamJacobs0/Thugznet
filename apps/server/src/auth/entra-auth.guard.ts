@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import type { AuthenticatedRequest } from './current-thug';
 
 @Injectable()
