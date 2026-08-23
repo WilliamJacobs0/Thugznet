@@ -1,7 +1,14 @@
-.PHONY: run stop
+.PHONY: setup dev stop
 
-run:
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev.ps1
+setup:
+	npm install
+	docker compose up -d
+	npm run db:migrate
+	npm run db:seed
+
+dev:
+	docker compose up -d
+	npm run dev
 
 stop:
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop.ps1
+	docker compose down
