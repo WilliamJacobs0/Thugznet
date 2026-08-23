@@ -7,7 +7,6 @@ import {
   getThugzcation,
   getThugz,
   updateCurrentThug,
-  type NewThugzMansion,
   type Thug,
   type ThugzcationView,
 } from './api.ts'
@@ -17,10 +16,12 @@ type AppProps = {
   authSession: AuthSession | null
 }
 
-const emptyMansion: NewThugzMansion = {
+const emptyMansion = {
   title: '',
   listingUrl: '',
   summary: '',
+  location: '',
+  bedrooms: '',
 }
 
 function App({ authSession }: AppProps) {
@@ -109,7 +110,11 @@ function App({ authSession }: AppProps) {
     setIsSaving(true)
 
     try {
-      const createdMansion = await addThugzMansion(authSession, mansion)
+      const createdMansion = await addThugzMansion(authSession, {
+        ...mansion,
+        location: mansion.location || null,
+        bedrooms: mansion.bedrooms === '' ? null : Number(mansion.bedrooms),
+      })
 
       setView((currentView) =>
         currentView
@@ -186,7 +191,7 @@ function App({ authSession }: AppProps) {
               <article className="mansion-card" key={eligibleMansion.id}>
                 <h3>{eligibleMansion.title}</h3>
                 {eligibleMansion.summary ? <p>{eligibleMansion.summary}</p> : null}
-                {eligibleMansion.location || eligibleMansion.bedrooms ? (
+                {eligibleMansion.location || eligibleMansion.bedrooms !== null ? (
                   <dl>
                     {eligibleMansion.location ? (
                       <div>
@@ -194,7 +199,7 @@ function App({ authSession }: AppProps) {
                         <dd>{eligibleMansion.location}</dd>
                       </div>
                     ) : null}
-                    {eligibleMansion.bedrooms ? (
+                    {eligibleMansion.bedrooms !== null ? (
                       <div>
                         <dt>Bedrooms</dt>
                         <dd>{eligibleMansion.bedrooms}</dd>
@@ -255,6 +260,30 @@ function App({ authSession }: AppProps) {
                       setMansion({ ...mansion, listingUrl: event.target.value })
                     }
                     placeholder="https://..."
+                  />
+                </label>
+
+                <label>
+                  Location
+                  <input
+                    value={mansion.location}
+                    onChange={(event) =>
+                      setMansion({ ...mansion, location: event.target.value })
+                    }
+                    placeholder="Town, State"
+                  />
+                </label>
+
+                <label>
+                  Bedrooms
+                  <input
+                    min="0"
+                    step="1"
+                    type="number"
+                    value={mansion.bedrooms}
+                    onChange={(event) =>
+                      setMansion({ ...mansion, bedrooms: event.target.value })
+                    }
                   />
                 </label>
 

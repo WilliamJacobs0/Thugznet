@@ -10,6 +10,8 @@ export type AddThugzMansionInput = {
   title: string;
   listingUrl: string;
   summary: string;
+  location?: string | null;
+  bedrooms?: number | null;
 };
 
 @Injectable()
@@ -40,6 +42,8 @@ export class ThugzcationService {
     const title = this.requiredText(request.title, 'Title');
     const listingUrl = this.validListingUrl(request.listingUrl);
     const summary = this.requiredText(request.summary, 'Summary');
+    const location = this.optionalText(request.location, 'Location');
+    const bedrooms = this.optionalWholeNumber(request.bedrooms, 'Bedrooms');
     const thugzcation = await this.getCurrentThugzcation();
 
     const existingMansion = await this.prisma.thugzMansion.findUnique({
@@ -61,6 +65,8 @@ export class ThugzcationService {
         title,
         listingUrl,
         summary,
+        location,
+        bedrooms,
         nominatedByThugId,
       },
     });
@@ -106,6 +112,30 @@ export class ThugzcationService {
     }
 
     return value.trim();
+  }
+
+  private optionalText(value: unknown, label: string) {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    if (typeof value !== 'string') {
+      throw new BadRequestException(`${label} must be text.`);
+    }
+
+    return value.trim() || null;
+  }
+
+  private optionalWholeNumber(value: unknown, label: string) {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+      throw new BadRequestException(`${label} must be a whole number.`);
+    }
+
+    return value;
   }
 
   private validListingUrl(value: unknown) {

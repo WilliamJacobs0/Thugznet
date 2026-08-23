@@ -28,6 +28,8 @@ export type NewThugzMansion = {
   title: string
   listingUrl: string
   summary: string
+  location: string | null
+  bedrooms: number | null
 }
 
 export function getThugzcation() {
