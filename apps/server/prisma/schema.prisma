@@ -10,11 +10,12 @@ datasource db {
 }
 
 model Thug {
-  id                     Int             @id @default(autoincrement())
-  firstName              String          @unique
+  id                     Int            @id @default(autoincrement())
+  firstName              String         @unique
   displayName            String
-  entraObjectId          String?         @unique
-  nominatedThugzMansions ThugzMansion[]  @relation("NominatedByThug")
+  entraObjectId          String?        @unique
+  nominatedThugzMansions ThugzMansion[] @relation("NominatedByThug")
+  players                Player[]
 }
 
 model Thugzcation {
@@ -41,4 +42,103 @@ model ThugzMansion {
 
   @@unique([thugzcationId, listingUrl])
   @@index([nominatedByThugId])
+}
+
+model Game {
+  id        Int      @id @default(autoincrement())
+  joinCode  String   @unique
+  createdAt DateTime @default(now())
+  world     World?
+  players   Player[]
+  turns     Turn[]
+}
+
+model World {
+  id          Int         @id @default(autoincrement())
+  gameId      Int         @unique
+  game        Game        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  description String      @default("")
+  attributes  Json        @default("{}")
+  characters  Character[]
+  locations   Location[]
+  things      Thing[]
+}
+
+model Player {
+  id                   Int           @id @default(autoincrement())
+  gameId               Int
+  game                 Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  thugId               Int
+  thug                 Thug          @relation(fields: [thugId], references: [id], onDelete: Restrict)
+  joinedAt             DateTime      @default(now())
+  controlledCharacters Character[]
+  inputs               PlayerInput[]
+
+  @@unique([gameId, thugId])
+  @@index([thugId])
+}
+
+model Character {
+  id                   Int     @id @default(autoincrement())
+  worldId              Int
+  world                World   @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  controlledByPlayerId Int?
+  controlledBy         Player? @relation(fields: [controlledByPlayerId], references: [id], onDelete: SetNull)
+  name                 String
+  description          String  @default("")
+  attributes           Json    @default("{}")
+
+  @@index([worldId])
+  @@index([controlledByPlayerId])
+}
+
+model Location {
+  id          Int    @id @default(autoincrement())
+  worldId     Int
+  world       World  @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  name        String
+  description String @default("")
+  attributes  Json   @default("{}")
+
+  @@index([worldId])
+}
+
+model Thing {
+  id          Int    @id @default(autoincrement())
+  worldId     Int
+  world       World  @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  name        String
+  description String @default("")
+  attributes  Json   @default("{}")
+
+  @@index([worldId])
+}
+
+model Turn {
+  id         Int           @id @default(autoincrement())
+  gameId     Int
+  game       Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  number     Int
+  prompt     String
+  openedAt   DateTime      @default(now())
+  closesAt   DateTime
+  resolvedAt DateTime?
+  narrative  String?
+  inputs     PlayerInput[]
+
+  @@unique([gameId, number])
+  @@index([gameId, resolvedAt])
+}
+
+model PlayerInput {
+  id        Int      @id @default(autoincrement())
+  turnId    Int
+  turn      Turn     @relation(fields: [turnId], references: [id], onDelete: Cascade)
+  playerId  Int
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([turnId, createdAt])
+  @@index([playerId])
 }
