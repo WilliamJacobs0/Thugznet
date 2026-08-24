@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { CurrentThug, type AuthenticatedThug } from '../auth/current-thug';
-import { EntraAuthGuard } from '../auth/entra-auth.guard';
+import { ThugAuthGuard } from '../auth/thug-auth.guard';
 import { ThugzService } from './thugz.service';
 
 type UpdateDisplayNameRequest = {
@@ -8,7 +8,7 @@ type UpdateDisplayNameRequest = {
 };
 
 @Controller()
-@UseGuards(EntraAuthGuard)
+@UseGuards(ThugAuthGuard)
 export class ThugzController {
   constructor(private readonly thugzService: ThugzService) {}
 

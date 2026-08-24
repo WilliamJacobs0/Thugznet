@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CurrentThug, type AuthenticatedThug } from '../auth/current-thug';
-import { EntraAuthGuard } from '../auth/entra-auth.guard';
+import { ThugAuthGuard } from '../auth/thug-auth.guard';
 import {
   type AddThugzMansionInput,
   ThugzcationService,
@@ -16,7 +16,7 @@ export class ThugzcationController {
   }
 
   @Post('mansions')
-  @UseGuards(EntraAuthGuard)
+  @UseGuards(ThugAuthGuard)
   addThugzMansion(
     @CurrentThug() thug: AuthenticatedThug,
     @Body() request: AddThugzMansionInput,

@@ -8,10 +8,10 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { PrismaService } from '../database/prisma.service';
-import type { AuthenticatedRequest } from './current-thug';
+import type { AuthenticatedRequest, AuthenticatedThug } from './current-thug';
 
 @Injectable()
-export class EntraAuthGuard implements CanActivate {
+export class ThugAuthGuard implements CanActivate {
   private verificationKeys?: ReturnType<
     typeof import('jose')['createRemoteJWKSet']
   >;
@@ -19,6 +19,54 @@ export class EntraAuthGuard implements CanActivate {
   constructor(private readonly prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest<Request>();
+    const thug = await this.authenticate(request);
+
+    (request as AuthenticatedRequest).thug = thug;
+    return true;
+  }
+
+  private authenticate(request: Request) {
+    switch (process.env.AUTH_MODE) {
+      case 'local':
+        return this.localThug();
+      case 'entra':
+        return this.entraThug(request);
+      default:
+        throw new ServiceUnavailableException(
+          'Authentication is not configured.',
+        );
+    }
+  }
+
+  private async localThug(): Promise<AuthenticatedThug> {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ServiceUnavailableException(
+        'Local authentication is disabled in production.',
+      );
+    }
+
+    const firstName = process.env.LOCAL_THUG_FIRST_NAME;
+
+    if (!firstName) {
+      throw new ServiceUnavailableException('Local Thug is not configured.');
+    }
+
+    const thug = await this.prisma.thug.findUnique({
+      where: { firstName },
+      select: { id: true, firstName: true, displayName: true },
+    });
+
+    if (!thug) {
+      throw new ServiceUnavailableException(
+        'The configured local Thug does not exist.',
+      );
+    }
+
+    return thug;
+  }
+
+  private async entraThug(request: Request): Promise<AuthenticatedThug> {
     const tenantId = process.env.ENTRA_TENANT_ID;
     const audience = process.env.ENTRA_API_AUDIENCE;
     const requiredScope = process.env.ENTRA_API_SCOPE;
@@ -29,7 +77,6 @@ export class EntraAuthGuard implements CanActivate {
       );
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
     const token = this.bearerToken(request.headers.authorization);
     const issuer = `https://login.microsoftonline.com/${tenantId}/v2.0`;
     const { createRemoteJWKSet, jwtVerify } = await import('jose');
@@ -70,11 +117,10 @@ export class EntraAuthGuard implements CanActivate {
     });
 
     if (!thug) {
-      throw new ForbiddenException('This account is not a Thug.');
+      throw new ForbiddenException('Not a Thug.');
     }
 
-    (request as AuthenticatedRequest).thug = thug;
-    return true;
+    return thug;
   }
 
   private bearerToken(authorization: string | undefined) {

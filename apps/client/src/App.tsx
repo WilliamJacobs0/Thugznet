@@ -41,7 +41,7 @@ function App({ authSession }: AppProps) {
   }, [])
 
   useEffect(() => {
-    if (!authSession || !isSignedIn) {
+    if (authSession && !isSignedIn) {
       return
     }
 
@@ -54,7 +54,11 @@ function App({ authSession }: AppProps) {
         setDisplayName(profile.displayName)
         setThugz(roster)
       })
-      .catch(showError)
+      .catch((requestError: unknown) => {
+        if (authSession) {
+          showError(requestError)
+        }
+      })
   }, [authSession, isSignedIn])
 
   function showError(requestError: unknown) {
@@ -78,7 +82,7 @@ function App({ authSession }: AppProps) {
   async function updateProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!authSession || !currentThug) {
+    if (!currentThug) {
       return
     }
 
@@ -102,7 +106,7 @@ function App({ authSession }: AppProps) {
   async function addMansion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!authSession) {
+    if (!currentThug) {
       return
     }
 

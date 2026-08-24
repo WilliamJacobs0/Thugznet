@@ -36,16 +36,16 @@ export function getThugzcation() {
   return request<ThugzcationView>('/api/thugzcation')
 }
 
-export function getCurrentThug(session: AuthSession) {
+export function getCurrentThug(session: AuthSession | null) {
   return authenticatedRequest<Thug>(session, '/api/me')
 }
 
-export function getThugz(session: AuthSession) {
+export function getThugz(session: AuthSession | null) {
   return authenticatedRequest<Thug[]>(session, '/api/thugz')
 }
 
 export function updateCurrentThug(
-  session: AuthSession,
+  session: AuthSession | null,
   displayName: string,
 ) {
   return authenticatedRequest<Thug>(session, '/api/me', {
@@ -56,7 +56,7 @@ export function updateCurrentThug(
 }
 
 export function addThugzMansion(
-  session: AuthSession,
+  session: AuthSession | null,
   mansion: NewThugzMansion,
 ) {
   return authenticatedRequest<ThugzMansion>(
@@ -71,13 +71,16 @@ export function addThugzMansion(
 }
 
 async function authenticatedRequest<T>(
-  session: AuthSession,
+  session: AuthSession | null,
   input: RequestInfo | URL,
   init?: RequestInit,
 ) {
-  const token = await getApiToken(session)
   const headers = new Headers(init?.headers)
-  headers.set('Authorization', `Bearer ${token}`)
+
+  if (session) {
+    const token = await getApiToken(session)
+    headers.set('Authorization', `Bearer ${token}`)
+  }
 
   return request<T>(input, { ...init, headers })
 }

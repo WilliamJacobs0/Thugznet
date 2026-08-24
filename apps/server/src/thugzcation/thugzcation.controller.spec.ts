@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EntraAuthGuard } from '../auth/entra-auth.guard';
+import { ThugAuthGuard } from '../auth/thug-auth.guard';
 import { ThugzcationController } from './thugzcation.controller';
 import { ThugzcationService } from './thugzcation.service';
 
@@ -21,7 +21,7 @@ describe('ThugzcationController', () => {
         },
       ],
     })
-      .overrideGuard(EntraAuthGuard)
+      .overrideGuard(ThugAuthGuard)
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .compile();
 

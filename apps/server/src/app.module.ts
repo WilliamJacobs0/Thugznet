@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EntraAuthGuard } from './auth/entra-auth.guard';
+import { ThugAuthGuard } from './auth/thug-auth.guard';
 import { PrismaService } from './database/prisma.service';
 import { ThugzcationController } from './thugzcation/thugzcation.controller';
 import { ThugzcationService } from './thugzcation/thugzcation.service';
@@ -12,7 +12,7 @@ import { ThugzService } from './thugz/thugz.service';
   providers: [
     ThugzcationService,
     ThugzService,
-    EntraAuthGuard,
+    ThugAuthGuard,
     PrismaService,
   ],
 })
