@@ -176,11 +176,31 @@ h2 {
 }
 
 .mansion-card a {
-  margin-top: auto;
   color: var(--link);
   font-size: 0.8rem;
   font-weight: 700;
   text-underline-offset: 0.2rem;
+}
+
+.mansion-card-footer {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.mansion-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mansion-actions .text-button {
+  font-size: 0.7rem;
+}
+
+.text-button.danger {
+  color: var(--accent);
 }
 
 .sidebar {
@@ -206,6 +226,15 @@ label {
 
 form {
   gap: 0.9rem;
+}
+
+.form-actions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.form-actions .text-button {
+  justify-self: start;
 }
 
 label {

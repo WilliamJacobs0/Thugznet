@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 
-export type AddThugzMansionInput = {
+export type ThugzMansionInput = {
   title: string;
   listingUrl: string;
   summary: string;
@@ -37,20 +37,16 @@ export class ThugzcationService {
 
   async addThugzMansion(
     nominatedByThugId: number,
-    request: AddThugzMansionInput,
+    request: ThugzMansionInput,
   ) {
-    const title = this.requiredText(request.title, 'Title');
-    const listingUrl = this.validListingUrl(request.listingUrl);
-    const summary = this.requiredText(request.summary, 'Summary');
-    const location = this.optionalText(request.location, 'Location');
-    const bedrooms = this.optionalWholeNumber(request.bedrooms, 'Bedrooms');
+    const mansion = this.validMansion(request);
     const thugzcation = await this.getCurrentThugzcation();
 
     const existingMansion = await this.prisma.thugzMansion.findUnique({
       where: {
         thugzcationId_listingUrl: {
           thugzcationId: thugzcation.id,
-          listingUrl,
+          listingUrl: mansion.listingUrl,
         },
       },
     });
@@ -59,17 +55,54 @@ export class ThugzcationService {
       throw new ConflictException('That listing is already eligible.');
     }
 
-    return this.prisma.thugzMansion.create({
+    const createdMansion = await this.prisma.thugzMansion.create({
       data: {
         thugzcationId: thugzcation.id,
-        title,
-        listingUrl,
-        summary,
-        location,
-        bedrooms,
+        ...mansion,
         nominatedByThugId,
       },
     });
+
+    return this.publicMansion(createdMansion);
+  }
+
+  async updateThugzMansion(
+    mansionId: number,
+    request: ThugzMansionInput,
+  ) {
+    const mansion = this.validMansion(request);
+    const thugzcation = await this.getCurrentThugzcation();
+    await this.requireMansion(mansionId, thugzcation.id);
+
+    const duplicateListing = await this.prisma.thugzMansion.findFirst({
+      where: {
+        thugzcationId: thugzcation.id,
+        listingUrl: mansion.listingUrl,
+        NOT: { id: mansionId },
+      },
+    });
+
+    if (duplicateListing) {
+      throw new ConflictException('That listing is already eligible.');
+    }
+
+    const updatedMansion = await this.prisma.thugzMansion.update({
+      where: { id: mansionId },
+      data: mansion,
+    });
+
+    return this.publicMansion(updatedMansion);
+  }
+
+  async deleteThugzMansion(mansionId: number) {
+    const thugzcation = await this.getCurrentThugzcation();
+    await this.requireMansion(mansionId, thugzcation.id);
+
+    const deletedMansion = await this.prisma.thugzMansion.delete({
+      where: { id: mansionId },
+    });
+
+    return this.publicMansion(deletedMansion);
   }
 
   private publicMansion(mansion: {
@@ -104,6 +137,27 @@ export class ThugzcationService {
     }
 
     return thugzcation;
+  }
+
+  private async requireMansion(mansionId: number, thugzcationId: number) {
+    const mansion = await this.prisma.thugzMansion.findFirst({
+      where: { id: mansionId, thugzcationId },
+      select: { id: true },
+    });
+
+    if (!mansion) {
+      throw new NotFoundException('Thugz Mansion not found.');
+    }
+  }
+
+  private validMansion(request: ThugzMansionInput) {
+    return {
+      title: this.requiredText(request.title, 'Title'),
+      listingUrl: this.validListingUrl(request.listingUrl),
+      summary: this.requiredText(request.summary, 'Summary'),
+      location: this.optionalText(request.location, 'Location'),
+      bedrooms: this.optionalWholeNumber(request.bedrooms, 'Bedrooms'),
+    };
   }
 
   private requiredText(value: unknown, label: string) {

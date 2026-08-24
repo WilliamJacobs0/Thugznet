@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentThug, type AuthenticatedThug } from '../auth/current-thug';
 import { ThugAuthGuard } from '../auth/thug-auth.guard';
 import {
-  type AddThugzMansionInput,
+  type ThugzMansionInput,
   ThugzcationService,
 } from './thugzcation.service';
 
@@ -19,8 +29,23 @@ export class ThugzcationController {
   @UseGuards(ThugAuthGuard)
   addThugzMansion(
     @CurrentThug() thug: AuthenticatedThug,
-    @Body() request: AddThugzMansionInput,
+    @Body() request: ThugzMansionInput,
   ) {
     return this.thugzcationService.addThugzMansion(thug.id, request);
+  }
+
+  @Patch('mansions/:id')
+  @UseGuards(ThugAuthGuard)
+  updateThugzMansion(
+    @Param('id', ParseIntPipe) mansionId: number,
+    @Body() request: ThugzMansionInput,
+  ) {
+    return this.thugzcationService.updateThugzMansion(mansionId, request);
+  }
+
+  @Delete('mansions/:id')
+  @UseGuards(ThugAuthGuard)
+  deleteThugzMansion(@Param('id', ParseIntPipe) mansionId: number) {
+    return this.thugzcationService.deleteThugzMansion(mansionId);
   }
 }

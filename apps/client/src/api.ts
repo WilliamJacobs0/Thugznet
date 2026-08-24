@@ -24,7 +24,7 @@ export type ThugzcationView = {
   eligibleThugzMansions: ThugzMansion[]
 }
 
-export type NewThugzMansion = {
+export type ThugzMansionInput = {
   title: string
   listingUrl: string
   summary: string
@@ -57,7 +57,7 @@ export function updateCurrentThug(
 
 export function addThugzMansion(
   session: AuthSession | null,
-  mansion: NewThugzMansion,
+  mansion: ThugzMansionInput,
 ) {
   return authenticatedRequest<ThugzMansion>(
     session,
@@ -67,6 +67,33 @@ export function addThugzMansion(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mansion),
     },
+  )
+}
+
+export function updateThugzMansion(
+  session: AuthSession | null,
+  mansionId: number,
+  mansion: ThugzMansionInput,
+) {
+  return authenticatedRequest<ThugzMansion>(
+    session,
+    `/api/thugzcation/mansions/${mansionId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(mansion),
+    },
+  )
+}
+
+export function deleteThugzMansion(
+  session: AuthSession | null,
+  mansionId: number,
+) {
+  return authenticatedRequest<ThugzMansion>(
+    session,
+    `/api/thugzcation/mansions/${mansionId}`,
+    { method: 'DELETE' },
   )
 }
 

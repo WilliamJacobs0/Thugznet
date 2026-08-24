@@ -3,11 +3,14 @@ import type { FormEvent } from 'react'
 import './App.css'
 import {
   addThugzMansion,
+  deleteThugzMansion,
   getCurrentThug,
   getThugzcation,
   getThugz,
+  updateThugzMansion,
   updateCurrentThug,
   type Thug,
+  type ThugzMansion,
   type ThugzcationView,
 } from './api.ts'
 import type { AuthSession } from './auth.ts'
@@ -31,8 +34,11 @@ function App({ authSession }: AppProps) {
   const [thugz, setThugz] = useState<Thug[]>([])
   const [displayName, setDisplayName] = useState('')
   const [mansion, setMansion] = useState(emptyMansion)
+  const [editingMansionId, setEditingMansionId] = useState<number | null>(null)
+  const [deletingMansionId, setDeletingMansionId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
+  const [profileIsSaving, setProfileIsSaving] = useState(false)
+  const [mansionIsSaving, setMansionIsSaving] = useState(false)
 
   useEffect(() => {
     void getThugzcation()
@@ -87,7 +93,7 @@ function App({ authSession }: AppProps) {
     }
 
     setError(null)
-    setIsSaving(true)
+    setProfileIsSaving(true)
 
     try {
       const updatedThug = await updateCurrentThug(authSession, displayName)
@@ -99,11 +105,27 @@ function App({ authSession }: AppProps) {
     } catch (requestError: unknown) {
       showError(requestError)
     } finally {
-      setIsSaving(false)
+      setProfileIsSaving(false)
     }
   }
 
-  async function addMansion(event: FormEvent<HTMLFormElement>) {
+  function editMansion(selectedMansion: ThugzMansion) {
+    setEditingMansionId(selectedMansion.id)
+    setMansion({
+      title: selectedMansion.title,
+      listingUrl: selectedMansion.listingUrl,
+      summary: selectedMansion.summary,
+      location: selectedMansion.location ?? '',
+      bedrooms: selectedMansion.bedrooms?.toString() ?? '',
+    })
+  }
+
+  function resetMansionForm() {
+    setEditingMansionId(null)
+    setMansion(emptyMansion)
+  }
+
+  async function saveMansion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (!currentThug) {
@@ -111,31 +133,86 @@ function App({ authSession }: AppProps) {
     }
 
     setError(null)
-    setIsSaving(true)
+    setMansionIsSaving(true)
 
     try {
-      const createdMansion = await addThugzMansion(authSession, {
+      const mansionInput = {
         ...mansion,
         location: mansion.location || null,
         bedrooms: mansion.bedrooms === '' ? null : Number(mansion.bedrooms),
-      })
+      }
+      const savedMansion = editingMansionId === null
+        ? await addThugzMansion(authSession, mansionInput)
+        : await updateThugzMansion(authSession, editingMansionId, mansionInput)
 
       setView((currentView) =>
         currentView
           ? {
               ...currentView,
-              eligibleThugzMansions: [
-                createdMansion,
-                ...currentView.eligibleThugzMansions,
-              ],
+              thugzcation: {
+                ...currentView.thugzcation,
+                selectedThugzMansion:
+                  currentView.thugzcation.selectedThugzMansion?.id ===
+                  savedMansion.id
+                    ? savedMansion
+                    : currentView.thugzcation.selectedThugzMansion,
+              },
+              eligibleThugzMansions: editingMansionId === null
+                ? [savedMansion, ...currentView.eligibleThugzMansions]
+                : currentView.eligibleThugzMansions.map((existingMansion) =>
+                    existingMansion.id === savedMansion.id
+                      ? savedMansion
+                      : existingMansion,
+                  ),
             }
           : currentView,
       )
-      setMansion(emptyMansion)
+      resetMansionForm()
     } catch (requestError: unknown) {
       showError(requestError)
     } finally {
-      setIsSaving(false)
+      setMansionIsSaving(false)
+    }
+  }
+
+  async function removeMansion(selectedMansion: ThugzMansion) {
+    if (!currentThug || !window.confirm(`Delete “${selectedMansion.title}”?`)) {
+      return
+    }
+
+    setError(null)
+    setDeletingMansionId(selectedMansion.id)
+
+    try {
+      await deleteThugzMansion(authSession, selectedMansion.id)
+      setView((currentView) =>
+        currentView
+          ? {
+              ...currentView,
+              thugzcation: {
+                ...currentView.thugzcation,
+                selectedThugzMansion:
+                  currentView.thugzcation.selectedThugzMansion?.id ===
+                  selectedMansion.id
+                    ? null
+                    : currentView.thugzcation.selectedThugzMansion,
+              },
+              eligibleThugzMansions:
+                currentView.eligibleThugzMansions.filter(
+                  (existingMansion) =>
+                    existingMansion.id !== selectedMansion.id,
+                ),
+            }
+          : currentView,
+      )
+
+      if (editingMansionId === selectedMansion.id) {
+        resetMansionForm()
+      }
+    } catch (requestError: unknown) {
+      showError(requestError)
+    } finally {
+      setDeletingMansionId(null)
     }
   }
 
@@ -211,9 +288,32 @@ function App({ authSession }: AppProps) {
                     ) : null}
                   </dl>
                 ) : null}
-                <a href={eligibleMansion.listingUrl} target="_blank" rel="noreferrer">
-                  View listing <span aria-hidden="true">↗</span>
-                </a>
+                <div className="mansion-card-footer">
+                  <a href={eligibleMansion.listingUrl} target="_blank" rel="noreferrer">
+                    View listing <span aria-hidden="true">&#8599;</span>
+                  </a>
+                  {currentThug ? (
+                    <div className="mansion-actions">
+                      <button
+                        className="text-button"
+                        type="button"
+                        onClick={() => editMansion(eligibleMansion)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="text-button danger"
+                        disabled={deletingMansionId === eligibleMansion.id}
+                        type="button"
+                        onClick={() => removeMansion(eligibleMansion)}
+                      >
+                        {deletingMansionId === eligibleMansion.id
+                          ? 'Deleting...'
+                          : 'Delete'}
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </article>
             ))}
           </div>
@@ -234,14 +334,24 @@ function App({ authSession }: AppProps) {
                     onChange={(event) => setDisplayName(event.target.value)}
                   />
                 </label>
-                <button disabled={isSaving} type="submit">Save name</button>
+                <button disabled={profileIsSaving} type="submit">
+                  {profileIsSaving ? 'Saving...' : 'Save name'}
+                </button>
               </form>
             </section>
 
             <section className="add-panel">
-              <p className="eyebrow">Nominate a house</p>
-              <h2>Add a Thugz Mansion</h2>
-              <form onSubmit={addMansion}>
+              <p className="eyebrow">
+                {editingMansionId === null
+                  ? 'Nominate a house'
+                  : 'Update the details'}
+              </p>
+              <h2>
+                {editingMansionId === null
+                  ? 'Add a Thugz Mansion'
+                  : 'Edit Thugz Mansion'}
+              </h2>
+              <form onSubmit={saveMansion}>
                 <label>
                   Title
                   <input
@@ -304,9 +414,23 @@ function App({ authSession }: AppProps) {
                   />
                 </label>
 
-                <button disabled={isSaving} type="submit">
-                  {isSaving ? 'Adding...' : 'Add mansion'}
-                </button>
+                <div className="form-actions">
+                  <button disabled={mansionIsSaving} type="submit">
+                    {mansionIsSaving
+                      ? 'Saving...'
+                      : editingMansionId === null ? 'Add mansion' : 'Save mansion'}
+                  </button>
+                  {editingMansionId !== null ? (
+                    <button
+                      className="text-button"
+                      disabled={mansionIsSaving}
+                      type="button"
+                      onClick={resetMansionForm}
+                    >
+                      Cancel
+                    </button>
+                  ) : null}
+                </div>
               </form>
             </section>
           </aside>
