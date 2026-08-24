@@ -97,7 +97,7 @@ export function deleteThugzMansion(
   )
 }
 
-async function authenticatedRequest<T>(
+export async function authenticatedRequest<T>(
   session: AuthSession | null,
   input: RequestInfo | URL,
   init?: RequestInit,
