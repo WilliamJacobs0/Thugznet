@@ -111,7 +111,7 @@ export class GamesService {
       throw new NotFoundException('Game not found.');
     }
 
-    return game;
+    return { ...game, serverTime: new Date() };
   }
 
   async deleteGame(gameId: number) {

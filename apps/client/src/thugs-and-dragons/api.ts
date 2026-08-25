@@ -17,6 +17,7 @@ export type Game = {
   id: number
   joinCode: string
   createdAt: string
+  serverTime: string
   world: {
     description: string
     characters: WorldEntity[]
@@ -51,6 +52,14 @@ export type Turn = {
       thug: { displayName: string }
     }
   }>
+}
+
+export type SubmittedInput = {
+  id: number
+  turnId: number
+  playerId: number
+  text: string
+  createdAt: string
 }
 
 type WorldEntity = {
@@ -113,7 +122,7 @@ export function submitInput(
   turnId: number,
   text: string,
 ) {
-  return authenticatedRequest<Turn['inputs'][number]>(
+  return authenticatedRequest<SubmittedInput>(
     session,
     `${basePath}/turns/${turnId}/inputs`,
     {

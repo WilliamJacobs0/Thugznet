@@ -14,7 +14,7 @@ export function GameDisplayPage({ authSession }: GameDisplayPageProps) {
   const [game, setGame] = useState<Game | null>(null)
   const [prompt, setPrompt] = useState('What do you do?')
   const [durationSeconds, setDurationSeconds] = useState('60')
-  const [now, setNow] = useState(Date.now())
+  const [serverTime, setServerTime] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const resolvingTurnId = useRef<number | null>(null)
@@ -27,19 +27,23 @@ export function GameDisplayPage({ authSession }: GameDisplayPageProps) {
 
     try {
       const loadedGame = await getGame(authSession, gameId)
+      const loadedServerTime = Date.parse(loadedGame.serverTime)
       setGame(loadedGame)
-      setNow(Date.now())
+      setServerTime(loadedServerTime)
       setError(null)
 
       const expiredTurn = loadedGame.turns.find(
         (turn) =>
-          !turn.resolvedAt && new Date(turn.closesAt).getTime() <= Date.now(),
+          !turn.resolvedAt &&
+          new Date(turn.closesAt).getTime() <= loadedServerTime,
       )
 
       if (expiredTurn && resolvingTurnId.current !== expiredTurn.id) {
         resolvingTurnId.current = expiredTurn.id
         await resolveTurn(authSession, expiredTurn.id)
-        setGame(await getGame(authSession, gameId))
+        const resolvedGame = await getGame(authSession, gameId)
+        setGame(resolvedGame)
+        setServerTime(Date.parse(resolvedGame.serverTime))
         resolvingTurnId.current = null
       }
     } catch (requestError: unknown) {
@@ -73,7 +77,9 @@ export function GameDisplayPage({ authSession }: GameDisplayPageProps) {
   const secondsRemaining = activeTurn
     ? Math.max(
         0,
-        Math.ceil((new Date(activeTurn.closesAt).getTime() - now) / 1000),
+        Math.ceil(
+          (new Date(activeTurn.closesAt).getTime() - serverTime) / 1000,
+        ),
       )
     : 0
 

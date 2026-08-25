@@ -16,7 +16,7 @@ export function PlayerPage({ authSession }: PlayerPageProps) {
   const [lastSent, setLastSent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
-  const [now, setNow] = useState(Date.now())
+  const [serverTime, setServerTime] = useState(0)
 
   const refresh = useCallback(async () => {
     if (!Number.isInteger(gameId)) {
@@ -25,8 +25,9 @@ export function PlayerPage({ authSession }: PlayerPageProps) {
     }
 
     try {
-      setGame(await getGame(authSession, gameId))
-      setNow(Date.now())
+      const loadedGame = await getGame(authSession, gameId)
+      setGame(loadedGame)
+      setServerTime(Date.parse(loadedGame.serverTime))
       setError(null)
     } catch (requestError: unknown) {
       setError(errorMessage(requestError))
@@ -40,6 +41,7 @@ export function PlayerPage({ authSession }: PlayerPageProps) {
       .then((joinedGame) => {
         if (active) {
           setGame(joinedGame)
+          setServerTime(Date.parse(joinedGame.serverTime))
           setError(null)
         }
       })
@@ -81,7 +83,7 @@ export function PlayerPage({ authSession }: PlayerPageProps) {
 
   const activeTurn = game?.turns.find((turn) => !turn.resolvedAt) ?? null
   const inputIsOpen = activeTurn
-    ? new Date(activeTurn.closesAt).getTime() > now
+    ? new Date(activeTurn.closesAt).getTime() > serverTime
     : false
 
   return (
