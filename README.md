@@ -58,5 +58,5 @@ Start PostgreSQL, the server, and the client together:
 make dev
 ```
 
-Vite opens `http://localhost:5173`. Press `Ctrl+C` to stop the client and
-server, then use `make stop` when you also want to stop PostgreSQL.
+Vite opens `http://localhost:5173`. Run `make stop` from another terminal to
+stop PostgreSQL, the server, and the client together.

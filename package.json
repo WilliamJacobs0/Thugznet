@@ -7,7 +7,7 @@
     "db:migrate": "npm run db:migrate --workspace server",
     "db:seed": "npm run db:seed --workspace server",
     "db:up": "docker compose up -d",
-    "dev": "concurrently --kill-others-on-fail --names server,client --prefix-colors blue,magenta \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "concurrently --kill-others --names database,server,client --prefix-colors yellow,blue,magenta \"docker compose up\" \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev --workspace client -- --open",
     "dev:server": "npm run start:dev --workspace server"
   },

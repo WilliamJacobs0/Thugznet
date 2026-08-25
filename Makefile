@@ -7,7 +7,6 @@ setup:
 	npm run db:seed
 
 dev:
-	docker compose up -d
 	npm run dev
 
 stop:
