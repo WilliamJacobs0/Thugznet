@@ -16,15 +16,12 @@ export function ThugzPage({
   onCurrentThugChange,
 }: ThugzPageProps) {
   const [thugz, setThugz] = useState<Thug[]>([])
-  const [displayName, setDisplayName] = useState('')
+  const [displayName, setDisplayName] = useState(currentThug?.displayName ?? '')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    setDisplayName(currentThug?.displayName ?? '')
-
     if (!currentThug) {
-      setThugz([])
       return
     }
 

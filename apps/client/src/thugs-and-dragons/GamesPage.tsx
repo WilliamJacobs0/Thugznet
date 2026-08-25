@@ -27,7 +27,8 @@ export function GamesPage({ authSession }: GamesPageProps) {
   }, [authSession])
 
   useEffect(() => {
-    void refresh()
+    const initialLoad = window.setTimeout(() => void refresh(), 0)
+    return () => window.clearTimeout(initialLoad)
   }, [refresh])
 
   async function addGame() {

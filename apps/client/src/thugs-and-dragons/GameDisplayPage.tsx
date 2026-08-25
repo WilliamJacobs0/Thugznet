@@ -53,9 +53,12 @@ export function GameDisplayPage({ authSession }: GameDisplayPageProps) {
   }, [authSession, gameId])
 
   useEffect(() => {
-    void refresh()
+    const initialPoll = window.setTimeout(() => void refresh(), 0)
     const polling = window.setInterval(() => void refresh(), 1000)
-    return () => window.clearInterval(polling)
+    return () => {
+      window.clearTimeout(initialPoll)
+      window.clearInterval(polling)
+    }
   }, [refresh])
 
   async function beginTurn(event: FormEvent<HTMLFormElement>) {

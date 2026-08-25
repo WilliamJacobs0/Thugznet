@@ -13,7 +13,7 @@ import type { AuthenticatedRequest, AuthenticatedThug } from './current-thug';
 @Injectable()
 export class ThugAuthGuard implements CanActivate {
   private verificationKeys?: ReturnType<
-    typeof import('jose')['createRemoteJWKSet']
+    (typeof import('jose'))['createRemoteJWKSet']
   >;
 
   constructor(private readonly prisma: PrismaService) {}

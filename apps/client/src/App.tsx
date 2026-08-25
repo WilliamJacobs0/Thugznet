@@ -20,8 +20,6 @@ function App({ authSession }: AppProps) {
 
   useEffect(() => {
     if (authSession && !isSignedIn) {
-      setCurrentThug(null)
-      setIdentityError(null)
       return
     }
 
@@ -109,6 +107,7 @@ function App({ authSession }: AppProps) {
           path="/thugz"
           element={
             <ThugzPage
+              key={currentThug?.id ?? 'anonymous'}
               authSession={authSession}
               currentThug={currentThug}
               onCurrentThugChange={setCurrentThug}

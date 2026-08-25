@@ -35,10 +35,7 @@ export class ThugzcationService {
     };
   }
 
-  async addThugzMansion(
-    nominatedByThugId: number,
-    request: ThugzMansionInput,
-  ) {
+  async addThugzMansion(nominatedByThugId: number, request: ThugzMansionInput) {
     const mansion = this.validMansion(request);
     const thugzcation = await this.getCurrentThugzcation();
 
@@ -66,10 +63,7 @@ export class ThugzcationService {
     return this.publicMansion(createdMansion);
   }
 
-  async updateThugzMansion(
-    mansionId: number,
-    request: ThugzMansionInput,
-  ) {
+  async updateThugzMansion(mansionId: number, request: ThugzMansionInput) {
     const mansion = this.validMansion(request);
     const thugzcation = await this.getCurrentThugzcation();
     await this.requireMansion(mansionId, thugzcation.id);

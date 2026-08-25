@@ -1,8 +1,6 @@
 # Thugznet
 
-Thugznet is the small application the Thugz use to organize their yearly
-Thugzcation. Its first job is keeping eligible Thugz Mansions easy to add,
-review, and compare.
+Thugznet is a React and NestJS application backed by PostgreSQL.
 
 ## How it is organized
 
@@ -10,8 +8,8 @@ review, and compare.
 - `apps/server` is the trusted NestJS application and HTTP API.
 - `apps/server/prisma` defines the PostgreSQL schema, migrations, and seed data.
 
-The mansion list is public. Profile changes, the Thug roster, and mansion
-creation require the server to resolve the request to a seeded `Thug`.
+Client and server code are grouped by feature. Shared HTTP, authentication,
+and database code remain at their respective application roots.
 
 ## Authentication
 

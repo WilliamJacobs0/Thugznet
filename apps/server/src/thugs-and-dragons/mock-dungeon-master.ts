@@ -7,7 +7,7 @@ import {
 
 @Injectable()
 export class MockDungeonMaster extends DungeonMaster {
-  async resolveTurn(context: DungeonMasterContext): Promise<TurnResolution> {
+  resolveTurn(context: DungeonMasterContext): Promise<TurnResolution> {
     const playerNames = new Map(
       context.players.map((player) => [player.id, player.displayName]),
     );
@@ -18,6 +18,6 @@ export class MockDungeonMaster extends DungeonMaster {
       )
       .join('\n');
 
-    return { narrative };
+    return Promise.resolve({ narrative });
   }
 }
