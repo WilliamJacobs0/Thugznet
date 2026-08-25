@@ -3,19 +3,18 @@ import type { FormEvent } from 'react'
 import {
   addThugzMansion,
   deleteThugzMansion,
-  getCurrentThug,
   getThugzcation,
-  getThugz,
   updateThugzMansion,
-  updateCurrentThug,
-  type Thug,
   type ThugzMansion,
   type ThugzcationView,
-} from '../api.ts'
+} from './api.ts'
 import type { AuthSession } from '../auth.ts'
+import type { Thug } from '../thugz/api.ts'
+import './styles.css'
 
 type ThugzcationPageProps = {
   authSession: AuthSession | null
+  currentThug: Thug | null
 }
 
 const emptyMansion = {
@@ -26,83 +25,24 @@ const emptyMansion = {
   bedrooms: '',
 }
 
-function ThugzcationPage({ authSession }: ThugzcationPageProps) {
-  const isSignedIn = Boolean(authSession?.client.getActiveAccount())
+function ThugzcationPage({ authSession, currentThug }: ThugzcationPageProps) {
   const [view, setView] = useState<ThugzcationView | null>(null)
-  const [currentThug, setCurrentThug] = useState<Thug | null>(null)
-  const [thugz, setThugz] = useState<Thug[]>([])
-  const [displayName, setDisplayName] = useState('')
   const [mansion, setMansion] = useState(emptyMansion)
   const [editingMansionId, setEditingMansionId] = useState<number | null>(null)
   const [deletingMansionId, setDeletingMansionId] = useState<number | null>(
     null,
   )
   const [error, setError] = useState<string | null>(null)
-  const [profileIsSaving, setProfileIsSaving] = useState(false)
   const [mansionIsSaving, setMansionIsSaving] = useState(false)
 
   useEffect(() => {
     void getThugzcation().then(setView).catch(showError)
   }, [])
 
-  useEffect(() => {
-    if (authSession && !isSignedIn) {
-      return
-    }
-
-    void Promise.all([getCurrentThug(authSession), getThugz(authSession)])
-      .then(([profile, roster]) => {
-        setCurrentThug(profile)
-        setDisplayName(profile.displayName)
-        setThugz(roster)
-      })
-      .catch((requestError: unknown) => {
-        if (authSession) {
-          showError(requestError)
-        }
-      })
-  }, [authSession, isSignedIn])
-
   function showError(requestError: unknown) {
     setError(
       requestError instanceof Error ? requestError.message : 'Request failed',
     )
-  }
-
-  async function signIn() {
-    if (!authSession) {
-      return
-    }
-
-    await authSession.client.loginRedirect({ scopes: [authSession.apiScope] })
-  }
-
-  async function signOut() {
-    await authSession?.client.logoutRedirect()
-  }
-
-  async function updateProfile(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!currentThug) {
-      return
-    }
-
-    setError(null)
-    setProfileIsSaving(true)
-
-    try {
-      const updatedThug = await updateCurrentThug(authSession, displayName)
-
-      setCurrentThug(updatedThug)
-      setThugz((roster) =>
-        roster.map((thug) => (thug.id === updatedThug.id ? updatedThug : thug)),
-      )
-    } catch (requestError: unknown) {
-      showError(requestError)
-    } finally {
-      setProfileIsSaving(false)
-    }
   }
 
   function editMansion(selectedMansion: ThugzMansion) {
@@ -178,7 +118,7 @@ function ThugzcationPage({ authSession }: ThugzcationPageProps) {
   }
 
   async function removeMansion(selectedMansion: ThugzMansion) {
-    if (!currentThug || !window.confirm(`Delete “${selectedMansion.title}”?`)) {
+    if (!currentThug || !window.confirm(`Delete "${selectedMansion.title}"?`)) {
       return
     }
 
@@ -225,31 +165,7 @@ function ThugzcationPage({ authSession }: ThugzcationPageProps) {
           </p>
           <h1>Thugzcation</h1>
         </div>
-
-        <div className="identity">
-          {currentThug ? <span>{currentThug.displayName}</span> : null}
-          {isSignedIn ? (
-            <button className="text-button" type="button" onClick={signOut}>
-              Sign out
-            </button>
-          ) : authSession ? (
-            <button className="text-button" type="button" onClick={signIn}>
-              Sign in
-            </button>
-          ) : null}
-        </div>
       </header>
-
-      {currentThug ? (
-        <section className="thug-roster" aria-labelledby="thugz-title">
-          <h2 id="thugz-title">Thugz:</h2>
-          <ul>
-            {thugz.map((thug) => (
-              <li key={thug.id}>{thug.displayName}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       {error ? (
         <p className="error" role="alert">
@@ -336,25 +252,6 @@ function ThugzcationPage({ authSession }: ThugzcationPageProps) {
 
         {currentThug ? (
           <aside className="sidebar">
-            <section className="profile-panel">
-              <p className="eyebrow">Signed in as {currentThug.firstName}</p>
-              <h2>Your display name</h2>
-              <form onSubmit={updateProfile}>
-                <label>
-                  Display name
-                  <input
-                    required
-                    maxLength={50}
-                    value={displayName}
-                    onChange={(event) => setDisplayName(event.target.value)}
-                  />
-                </label>
-                <button disabled={profileIsSaving} type="submit">
-                  {profileIsSaving ? 'Saving...' : 'Save name'}
-                </button>
-              </form>
-            </section>
-
             <section className="add-panel">
               <p className="eyebrow">
                 {editingMansionId === null

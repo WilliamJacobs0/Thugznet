@@ -1,0 +1,54 @@
+.thugz-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.thugz-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: 1rem;
+  align-items: start;
+}
+
+.roster-panel,
+.profile-panel {
+  padding: 1rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.roster-panel h2,
+.profile-panel h2 {
+  margin-bottom: 1rem;
+}
+
+.roster-panel ul {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roster-panel li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed var(--muted);
+}
+
+.roster-panel li:last-child {
+  border-bottom: 0;
+}
+
+.roster-panel span {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .thugz-workspace {
+    grid-template-columns: 1fr;
+  }
+}

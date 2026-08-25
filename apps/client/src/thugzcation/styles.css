@@ -1,0 +1,138 @@
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: 2rem;
+  padding-top: 2rem;
+}
+
+.workspace.public {
+  grid-template-columns: 1fr;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.section-heading span {
+  font-size: 0.75rem;
+}
+
+.section-heading span::before {
+  content: '[';
+}
+
+.section-heading span::after {
+  content: ']';
+}
+
+.mansion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.75rem;
+}
+
+.mansion-card,
+.add-panel,
+.empty-state {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.mansion-card {
+  display: flex;
+  min-height: 12rem;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.mansion-card h3 {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.mansion-card p {
+  color: var(--muted);
+  font-family: Georgia, serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.mansion-card dl {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 1rem;
+}
+
+.mansion-card dt {
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.mansion-card dd {
+  margin: 0.15rem 0 0;
+}
+
+.mansion-card a {
+  color: var(--link);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-underline-offset: 0.2rem;
+}
+
+.mansion-card-footer {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.mansion-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mansion-actions .text-button {
+  font-size: 0.7rem;
+}
+
+.sidebar {
+  display: grid;
+  align-self: start;
+  gap: 0.75rem;
+}
+
+.add-panel {
+  padding: 1rem;
+}
+
+.add-panel h2 {
+  margin-bottom: 1.25rem;
+}
+
+.form-actions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.form-actions .text-button {
+  justify-self: start;
+}
+
+@media (max-width: 700px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    grid-row: 1;
+  }
+}
